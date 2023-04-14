@@ -50,6 +50,7 @@ def start(message) -> None:
            "/sum: Сумма покупок за текущий месяц\n" \
            "/last_sum: Сумма покупок за прошлый месяц\n" \
            "/avg: Средняя сумма покупки за этот месяц\n" \
+           "/avg_per_day: Средняя сумма покупок в день\n" \
            "/all_in_month: Все покупки за этот месяц\n" \
            "/last_month Все покупки за прошлый месяц"
     bot.send_message(message.chat.id, text, reply_markup=markup)

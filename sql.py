@@ -10,3 +10,4 @@ sql.execute("""CREATE TABLE IF NOT EXISTS cost_accounting (
                )
                """)
 db.commit()
+db.close()
