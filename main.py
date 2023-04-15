@@ -242,14 +242,14 @@ def all_in_last_month(message) -> None:
 def db_save_from_text(message) -> None:
     if message.text.isdigit():
         year, month, days = get_date()
-        time = datetime.now().strftime("%H:%M").split(":")
+        time = datetime.now().strftime("%H:%M:%S").split(":")
         day = datetime.now().strftime("%d")
 
         db = sqlite3.connect("cost_accounting_base.db")
         sql = db.cursor()
         sql.execute(f"""INSERT INTO cost_accounting
                         VALUES
-                            ({message.from_user.id}, datetime('{year}-{month}-{day} {time[0]}:{time[1]}'), {message.text});""")
+                            ({message.from_user.id}, datetime('{year}-{month}-{day} {time[0]}:{time[1]}:{time[2]}'), {message.text});""")
         db.commit()
         db.close()
 
