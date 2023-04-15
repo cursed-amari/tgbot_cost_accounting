@@ -41,6 +41,7 @@ def get_date():
 
 @bot.message_handler(commands=['start'])
 def start(message) -> None:
+    bot.send_message(message.chat.id, message.from_user.id, reply_markup=markup)
     text = "Отправь фото чека с QR кодом или сумму покупки, я запишу ｡^‿^｡"
     bot.send_message(message.chat.id, text, reply_markup=markup)
 
@@ -77,7 +78,7 @@ def db_save(message) -> None:
         sql = db.cursor()
         sql.execute(f"""INSERT INTO cost_accounting
                         VALUES
-                            (datetime('{date[0]}-{date[1]}-{date[2]} {time[0]}:{time[1]}'), {coast});""")
+                            ({message.from_user.id}, datetime('{date[0]}-{date[1]}-{date[2]} {time[0]}:{time[1]}'), {coast});""")
         db.commit()
         db.close()
         bot.send_message(message.chat.id, "Покупка сохранена:\n"
@@ -95,7 +96,7 @@ def sum_current_month(message) -> None:
     sql = db.cursor()
     sql_result = sql.execute(f"""SELECT SUM(cost)
                         FROM cost_accounting
-                        WHERE date BETWEEN datetime('{year}-{month}-01') AND datetime('{year}-{month}-{days}')""")
+                        WHERE telegram_id = {message.from_user.id} AND (date BETWEEN datetime('{year}-{month}-01') AND datetime('{year}-{month}-{days}'))""")
 
     text = sql_result.fetchone()
 
@@ -125,7 +126,7 @@ def all_in_last_month(message) -> None:
     sql = db.cursor()
     sql_result = sql.execute(f"""SELECT SUM(cost)
                         FROM cost_accounting
-                        WHERE date BETWEEN datetime('{year}-{month}-01') AND datetime('{year}-{month}-{days}')""")
+                        WHERE telegram_id = {message.from_user.id} AND (date BETWEEN datetime('{year}-{month}-01') AND datetime('{year}-{month}-{days}'))""")
 
     text = sql_result.fetchone()
 
@@ -146,7 +147,7 @@ def average_month(message) -> None:
     sql = db.cursor()
     sql_result = sql.execute(f"""SELECT AVG(cost)
                         FROM cost_accounting
-                        WHERE date BETWEEN datetime('{year}-{month}-01') AND datetime('{year}-{month}-{days}')""")
+                        WHERE telegram_id = {message.from_user.id} AND (date BETWEEN datetime('{year}-{month}-01') AND datetime('{year}-{month}-{days}'))""")
 
     text = sql_result.fetchone()
 
@@ -168,6 +169,7 @@ def average_month_per_day(message) -> None:
     sql_result = sql.execute(f"""SELECT AVG(sum_cost.sum)
                                  FROM (SELECT SUM(cost) AS sum
                                      FROM cost_accounting
+                                     WHERE telegram_id = {message.from_user.id}
                                      GROUP BY strftime('%m-%d', date)) AS sum_cost""")
 
     text = sql_result.fetchone()
@@ -189,12 +191,12 @@ def all_in_month(message) -> None:
     sql = db.cursor()
     sql_result = sql.execute(f"""SELECT *
                         FROM cost_accounting
-                        WHERE date BETWEEN datetime('{year}-{month}-01') AND datetime('{year}-{month}-{days}')
+                        WHERE telegram_id = {message.from_user.id} AND (date BETWEEN datetime('{year}-{month}-01') AND datetime('{year}-{month}-{days}'))
                         ORDER BY date DESC""")
 
     result = ""
     for i in sql_result.fetchall():
-        result += i[0] + " " + str(i[1]) + "\n"
+        result += i[1] + " " + str(i[2]) + "\n"
 
     if result == "":
         text = "Покупок не было"
@@ -222,12 +224,12 @@ def all_in_last_month(message) -> None:
     sql = db.cursor()
     sql_result = sql.execute(f"""SELECT *
                         FROM cost_accounting
-                        WHERE date BETWEEN datetime('{year}-{month}-01') AND datetime('{year}-{month}-{days}')
+                        WHERE telegram_id = {message.from_user.id} AND (date BETWEEN datetime('{year}-{month}-01') AND datetime('{year}-{month}-{days}'))
                         ORDER BY date DESC""")
 
     result = ""
     for i in sql_result.fetchall():
-        result += i[0] + " " + str(i[1]) + "\n"
+        result += i[1] + " " + str(i[2]) + "\n"
 
     if result == "":
         text = "Покупок не было"
@@ -247,7 +249,7 @@ def db_save_from_text(message) -> None:
         sql = db.cursor()
         sql.execute(f"""INSERT INTO cost_accounting
                         VALUES
-                            (datetime('{year}-{month}-{day} {time[0]}:{time[1]}'), {message.text});""")
+                            ({message.from_user.id}, datetime('{year}-{month}-{day} {time[0]}:{time[1]}'), {message.text});""")
         db.commit()
         db.close()
 
@@ -257,4 +259,4 @@ def db_save_from_text(message) -> None:
 
 
 if __name__ == "__main__":
-    bot.polling(none_stop=True)
+    bot.infinity_polling(timeout=10, long_polling_timeout=5)
