@@ -33,7 +33,6 @@ markup.add(help,
 
 @bot.message_handler(commands=['start'])
 def start(message) -> None:
-    bot.send_message(message.chat.id, message.from_user.id, reply_markup=markup)
     text = "Отправь фото чека с QR кодом или сумму покупки, я запишу ｡^‿^｡"
     bot.send_message(message.chat.id, text, reply_markup=markup)
 
