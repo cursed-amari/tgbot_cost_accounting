@@ -10,6 +10,10 @@
 * Все покупки за прошлый месяц
 * Сумму, среднюю сумму и все покупки за определённый период
 
+> Запуск:  
+> pip install -r /path/to/requirements.txt  
+> python sql.py  
+> python main.py  
 
 *SQLite 3*  
 *Pillow*  
